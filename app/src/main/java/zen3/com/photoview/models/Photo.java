@@ -5,6 +5,7 @@ package zen3.com.photoview.models;
  */
 
 public class Photo {
+
     String id,user_id,name,description,image_url;
 
     String[] tags;

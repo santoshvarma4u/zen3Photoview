@@ -10,15 +10,7 @@ public class Photos {
     String id,user_id,name,description,image_url;
 
     String[] tags;
-    List<Photo> photo;
 
-    public List<Photo> getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(List<Photo> photo) {
-        this.photo = photo;
-    }
 
     public String[] getTags() {
         return tags;

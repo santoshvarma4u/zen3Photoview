@@ -21,6 +21,8 @@ import retrofit2.http.Query;
 import retrofit2.http.Url;
 import zen3.com.photoview.Helpers.Helper;
 import zen3.com.photoview.libs.ConfigurationManager;
+import zen3.com.photoview.models.Photo;
+import zen3.com.photoview.models.PhotoDetailPojo;
 import zen3.com.photoview.models.PhotoResponse;
 import zen3.com.photoview.models.Photos;
 import zen3.com.photoview.services.BaseService;
@@ -33,7 +35,7 @@ public class PhotoDetailView extends AppCompatActivity {
     protected ImageView ivPhoto;
     protected TextView tvTags;
     public static String photoID="";
-    Photos mPhotos;
+    Photo mPhotos;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,19 +85,18 @@ public class PhotoDetailView extends AppCompatActivity {
         authorizer.version="1.0";
 
         PhotoDetails mPhotoDetails = BaseService.createService(PhotoDetails.class, authorizer);
-        Call<Photos> mcall=mPhotoDetails.getPhotosDetails("photos/"+photoID,"3","1","1",ConfigurationManager.ConsumerKey);
-        mcall.enqueue(new Callback<Photos>() {
+        Call<PhotoDetailPojo> mcall=mPhotoDetails.getPhotosDetails("photos/"+photoID,"3","1","1",ConfigurationManager.ConsumerKey);
+        mcall.enqueue(new Callback<PhotoDetailPojo>() {
             @Override
-            public void onResponse(Call<Photos> call, Response<Photos> response) {
+            public void onResponse(Call<PhotoDetailPojo> call, Response<PhotoDetailPojo> response) {
                 Helper.hideLoadingDialog();
-
-                Log.e("response","raaaaaaaa");
 
                 if(response.isSuccessful())
                     Log.e("response",response.body().getPhoto().get(0).getName());
                 else
                     Log.e("response",response.errorBody().toString());
-             /*   mPhotos=response.body();
+
+                mPhotos=response.body().getPhoto().get(0);
                 photoName.setText(mPhotos.getName());
                 photoDescription.setText(mPhotos.getDescription());
 
@@ -111,11 +112,11 @@ public class PhotoDetailView extends AppCompatActivity {
                {
                    tagString=tagString+tag;
                }
-               tvTags.setText(tagString);*/
+               tvTags.setText(tagString);
             }
 
             @Override
-            public void onFailure(Call<Photos> call, Throwable t) {
+            public void onFailure(Call<PhotoDetailPojo> call, Throwable t) {
                 t.printStackTrace();
                 Helper.hideLoadingDialog();
             }
