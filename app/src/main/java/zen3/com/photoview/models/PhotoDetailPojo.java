@@ -1,5 +1,7 @@
 package zen3.com.photoview.models;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -7,13 +9,16 @@ import java.util.List;
  */
 
 public class PhotoDetailPojo {
-    List<Photo> photo;
 
-    public List<Photo> getPhoto() {
+    public Photo getPhoto() {
         return photo;
     }
 
-    public void setPhoto(List<Photo> photo) {
+    public void setPhoto(Photo photo) {
         this.photo = photo;
     }
+
+    Photo photo;
+
+
 }

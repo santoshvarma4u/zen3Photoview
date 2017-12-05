@@ -92,11 +92,11 @@ public class PhotoDetailView extends AppCompatActivity {
                 Helper.hideLoadingDialog();
 
                 if(response.isSuccessful())
-                    Log.e("response",response.body().getPhoto().get(0).getName());
+                    Log.e("response",response.body().getPhoto().getName());
                 else
                     Log.e("response",response.errorBody().toString());
 
-                mPhotos=response.body().getPhoto().get(0);
+                mPhotos=response.body().getPhoto();
                 photoName.setText(mPhotos.getName());
                 photoDescription.setText(mPhotos.getDescription());
 
@@ -110,7 +110,7 @@ public class PhotoDetailView extends AppCompatActivity {
                String[] tags=mPhotos.getTags();
                for(String tag:tags)
                {
-                   tagString=tagString+tag;
+                   tagString=tagString+","+tag;
                }
                tvTags.setText(tagString);
             }
