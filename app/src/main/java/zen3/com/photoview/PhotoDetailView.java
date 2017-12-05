@@ -54,7 +54,7 @@ public class PhotoDetailView extends AppCompatActivity {
         ivLike.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //service to update like on photo with userid
+                //service to update like on photo with
             }
         });
     }
