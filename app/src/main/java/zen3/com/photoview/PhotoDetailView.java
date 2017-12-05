@@ -107,10 +107,10 @@ public class PhotoDetailView extends AppCompatActivity {
                         .error(R.drawable.ic_launcher_foreground)
                         .into(ivPhoto);
 
-                if (mPhotos.getLiked())
+              /*  if (mPhotos.getLiked())
                         ivLike.setImageDrawable(getResources().getDrawable(R.drawable.ic_heart_red));
                 else
-                    ivLike.setImageDrawable(getResources().getDrawable(R.drawable.ic_heart_grey));
+                         ivLike.setImageDrawable(getResources().getDrawable(R.drawable.ic_heart_grey));*/
 
 
                     String tagString = "";
