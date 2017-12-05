@@ -8,13 +8,26 @@
     android:orientation="vertical"
     tools:context="zen3.com.photoview.PhotoDetailView">
 
-    <TextView
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:textSize="15dp"
-        android:id="@+id/photo_name"
-        android:text="Name"/>
+        android:orientation="horizontal">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:textSize="15dp"
+            android:id="@+id/photo_name"
+            android:text="Name"/>
+        <ImageView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/iv_like"
+            android:src="@drawable/ic_heart_grey"/>
+
+    </LinearLayout>
+
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -24,8 +37,9 @@
         android:text="Description"/>
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_gravity="center"
         android:src="@mipmap/ic_launcher"
         android:id="@+id/iv_photo"/>
 
@@ -33,7 +47,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:textSize="14sp"
+        android:textColor="#000"
         android:text="Tags"
+        />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:text="Tags"
+        android:textSize="12sp"
         android:id="@+id/tv_tags"
         />
 

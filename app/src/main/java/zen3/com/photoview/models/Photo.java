@@ -7,6 +7,15 @@ package zen3.com.photoview.models;
 public class Photo {
 
     String id,user_id,name,description,image_url;
+    Boolean liked;
+
+    public Boolean getLiked() {
+        return liked;
+    }
+
+    public void setLiked(Boolean liked) {
+        this.liked = liked;
+    }
 
     String[] tags;
 
