@@ -1,5 +1,6 @@
 package zen3.com.photoview;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -124,6 +125,14 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
             tv_name=(TextView)itemView.findViewById(R.id.tv_name);
             tv_description=(TextView)itemView.findViewById(R.id.tv_description);
             iv_photo = (ImageView) itemView.findViewById(R.id.iv_photo);
+            iv_photo.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent=new Intent(ShowImagesList.this,PhotoDetailView.class);
+                    intent.putExtra("photoId",mPhotosList.get(getAdapterPosition()).getId());
+                    startActivity(intent);
+                }
+            });
         }
     }
 

@@ -1,34 +1,13 @@
 package zen3.com.photoview.models;
 
-import java.util.List;
-
 /**
- * Created by tskva on 12/5/2017.
+ * Created by SantoshT on 12/5/2017.
  */
 
-public class Photos {
+public class Photo {
     String id,user_id,name,description,image_url;
 
     String[] tags;
-    List<Photo> photo;
-
-    public List<Photo> getPhoto() {
-        return photo;
-    }
-
-    public void setPhoto(List<Photo> photo) {
-        this.photo = photo;
-    }
-
-    public String[] getTags() {
-        return tags;
-    }
-
-    public void setTags(String[] tags) {
-        this.tags = tags;
-    }
-
-
 
     public String getId() {
         return id;
@@ -68,5 +47,13 @@ public class Photos {
 
     public void setImage_url(String image_url) {
         this.image_url = image_url;
+    }
+
+    public String[] getTags() {
+        return tags;
+    }
+
+    public void setTags(String[] tags) {
+        this.tags = tags;
     }
 }
