@@ -2,6 +2,7 @@ package zen3.com.photoview;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.api.client.auth.oauth.OAuthHmacSigner;
@@ -21,6 +23,7 @@ import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import retrofit2.Call;
@@ -29,6 +32,7 @@ import retrofit2.Response;
 import zen3.com.photoview.Helpers.Helper;
 import zen3.com.photoview.Helpers.HttpCallResponse;
 import zen3.com.photoview.libs.ConfigurationManager;
+import zen3.com.photoview.listner.OnLoadMoreListener;
 import zen3.com.photoview.models.PhotoResponse;
 import zen3.com.photoview.models.Photos;
 import zen3.com.photoview.services.BaseService;
@@ -42,7 +46,12 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
     protected RecyclerView rvImages;
     ArrayList<Photos> mPhotosList;
     LinearLayoutManager mLayoutManager;
-    public boolean isViewWithCatalog=false;
+    private int visibleThreshold = 20;
+    public boolean isViewWithCatalog=true;
+    StaggeredGridLayoutManager staggeredGridLayoutManager;
+    int mLoadStartCount=0;
+    int mLoadEndCount=0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,11 +64,11 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
     public void onClick(View view) {
         if (view.getId() == R.id.btnList) {
             isViewWithCatalog=true;
-            rvImages.setLayoutManager(isViewWithCatalog ? new LinearLayoutManager(this) : new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            rvImages.setLayoutManager(isViewWithCatalog ? mLayoutManager : staggeredGridLayoutManager);
             rvImages.setAdapter(mPhotosAdapter);
         } else if (view.getId() == R.id.btnGrid) {
             isViewWithCatalog=false;
-            rvImages.setLayoutManager(isViewWithCatalog ? new LinearLayoutManager(this) : new StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL));
+            rvImages.setLayoutManager(isViewWithCatalog ? mLayoutManager : staggeredGridLayoutManager);
             rvImages.setAdapter(mPhotosAdapter);
 
         }
@@ -76,31 +85,137 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
         rvImages.setItemAnimator(new DefaultItemAnimator());
         mPhotosList=new ArrayList<>();
         mPhotosAdapter=new PhotosAdapter();
-        getPhotosFeed();
+        staggeredGridLayoutManager =new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL);
+        getPhotosFeed(0,20);
+
+        mPhotosAdapter.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                Log.e("inloadmore", isLoading+"Load More");
+                if(isLoading)
+                {
+                    mPhotosList.add(null);
+                    mPhotosAdapter.notifyItemInserted(mPhotosList.size() - 1);
+                    getPhotosFeed(mLoadStartCount,mLoadEndCount);
+                }
+
+            }
+        });
     }
     PhotosAdapter mPhotosAdapter;
+    int[] lastPositions=null;
+    public boolean isLoading=false;
     public class PhotosAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
+        private final int VIEW_TYPE_ITEM = 0;
+        private final int VIEW_TYPE_LOADING = 1;
+
+        private OnLoadMoreListener mOnLoadMoreListener;
+
+
+        private int lastVisibleItem, totalItemCount;
+
+
+        public PhotosAdapter()
+        {
+            rvImages.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                }
+
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+
+                    if(isViewWithCatalog)
+                    {
+                        totalItemCount = mLayoutManager.getItemCount();
+
+                        lastVisibleItem = mLayoutManager.findLastVisibleItemPosition();
+
+                        if (!isLoading && totalItemCount <= (lastVisibleItem + 1)) {
+                            if (mOnLoadMoreListener != null) {
+                                isLoading = true;
+                                mOnLoadMoreListener.onLoadMore();
+                            }
+
+                            //  Log.i("reached last",isLoading+","+lastVisibleItem);
+                        }
+
+                    }
+                    else
+                    {
+
+                        totalItemCount = staggeredGridLayoutManager.getItemCount();
+                        if (lastPositions == null)
+                            lastPositions = new int[staggeredGridLayoutManager.getSpanCount()];
+                        lastPositions = staggeredGridLayoutManager.findLastCompletelyVisibleItemPositions(lastPositions);
+                        lastVisibleItem = Math.max(lastPositions[0], lastPositions[1]);
+                        Log.i("reached last",totalItemCount+","+lastVisibleItem);
+                        if (!isLoading && totalItemCount <= (lastVisibleItem + 1)) {
+                            if (mOnLoadMoreListener != null) {
+                                isLoading = true;
+                                mOnLoadMoreListener.onLoadMore();
+                            }
+
+                        }
+
+                    }
+
+
+                }
+            });
+        }
+
+        public void setOnLoadMoreListener(OnLoadMoreListener mOnLoadMoreListener) {
+            this.mOnLoadMoreListener = mOnLoadMoreListener;
+        }
+
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            RecyclerView.ViewHolder viewHolder;
-            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            View vPhotos = inflater.inflate(R.layout.item_images_list, parent, false);
-            viewHolder = new ViewHolderPhotos(vPhotos);
-            return viewHolder;
+            if (viewType == VIEW_TYPE_ITEM) {
+                RecyclerView.ViewHolder viewHolder;
+                LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+                View vPhotos = inflater.inflate(R.layout.item_images_list, parent, false);
+                viewHolder = new ViewHolderPhotos(vPhotos);
+                return viewHolder;
+            }
+            else if (viewType == VIEW_TYPE_LOADING)
+            {
+                View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false);
+                return new LoadingViewHolder(view);
+            }
+            return null;
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
-            ViewHolderPhotos vh2 = (ViewHolderPhotos) holder;
-            configureViewHolderPhotos(vh2, position);
+            if (holder instanceof ViewHolderPhotos) {
+                ViewHolderPhotos vh2 = (ViewHolderPhotos) holder;
+                configureViewHolderPhotos(vh2, position);
+            }
+            else
+            {
+                LoadingViewHolder loadingViewHolder = (LoadingViewHolder) holder;
+                loadingViewHolder.progressBar.setIndeterminate(true);
+            }
+
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return mPhotosList.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
         }
 
         Photos mPhotos;
         @Override
         public int getItemCount() {
-            return mPhotosList.size();
+            return mPhotosList== null ? 0 : mPhotosList.size();
+        }
+
+        public void setLoaded() {
+            isLoading = false;
         }
 
         public void configureViewHolderPhotos(final ViewHolderPhotos holder, final int position) {
@@ -114,6 +229,16 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
                     .into(holder.iv_photo);
         }
     }
+
+    class LoadingViewHolder extends RecyclerView.ViewHolder {
+        public ProgressBar progressBar;
+
+        public LoadingViewHolder(View itemView) {
+            super(itemView);
+            progressBar = (ProgressBar) itemView.findViewById(R.id.progressBar1);
+        }
+    }
+
 
     class ViewHolderPhotos extends RecyclerView.ViewHolder{
 
@@ -136,9 +261,12 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
         }
     }
 
-    public void getPhotosFeed()
+    public void getPhotosFeed(final int startCount, final int endCount)
     {
-        Helper.showLoadingDialog(ShowImagesList.this);
+        if(!isLoading)
+             Helper.showLoadingDialog(ShowImagesList.this);
+
+
         String nonce = UUID.randomUUID().toString();
 
         Long tsLong = System.currentTimeMillis() / 1000;
@@ -155,17 +283,40 @@ public class ShowImagesList extends AppCompatActivity implements View.OnClickLis
         authorizer.signatureMethod=signer.getSignatureMethod();
         authorizer.version="1.0";
         PhotoFeedInterFace mPhotoFeedInterFace = BaseService.createService(PhotoFeedInterFace.class, authorizer);
-        Call<PhotoResponse> mcall=mPhotoFeedInterFace.getPhotosFeed("popular","created_at","20",
+        Call<PhotoResponse> mcall=mPhotoFeedInterFace.getPhotosFeed("popular","created_at",endCount+"",
                 "3","store_download",ConfigurationManager.ConsumerKey,"voted");
         mcall.enqueue(new Callback<PhotoResponse>() {
             @Override
             public void onResponse(Call<PhotoResponse> call, Response<PhotoResponse> response) {
-                Helper.hideLoadingDialog();
+                if(!isLoading)
+                    Helper.hideLoadingDialog();
+
+
                 if (response.isSuccessful())
                 {
-                    mPhotosList= (ArrayList<Photos>) response.body().getPhotos();
+                    mLoadStartCount=startCount+20;
+                    mLoadEndCount=endCount+20;
+
+                    if(isLoading && mPhotosList.size() > 0)
+                    {
+                        mPhotosList.remove(mPhotosList.size()-1);
+                        mPhotosAdapter.notifyItemRemoved(mPhotosList.size());
+                    }
+                    ArrayList<Photos> mResponsePhotos= (ArrayList<Photos>) response.body().getPhotos();
+
+                    //insted of adding direct list.. add items into list for load multiple times
+                    for(Photos mPhotos:mResponsePhotos)
+                    {
+                      mPhotosList.add(mPhotos);
+                    }
                     rvImages.setAdapter(mPhotosAdapter);
                     mPhotosAdapter.notifyDataSetChanged();
+
+
+                    if(isLoading) {
+                        rvImages.scrollToPosition(endCount - 20);
+                        mPhotosAdapter.setLoaded();
+                    }
                 }
                 else
                     try {

@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/zen3Photoview.iml" filepath="$PROJECT_DIR$/zen3Photoview.iml" />
+      <module fileurl="file://D:\Andriod Projects\zen3Photoview\app\app.iml" filepath="D:\Andriod Projects\zen3Photoview\app\app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/zen3Photoview.iml" filepath="$PROJECT_DIR$/.idea/zen3Photoview.iml" />
+      <module fileurl="file://D:\Andriod Projects\zen3Photoview\zen3Photoview.iml" filepath="D:\Andriod Projects\zen3Photoview\zen3Photoview.iml" />
     </modules>
   </component>
 </project>
