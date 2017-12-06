@@ -79,7 +79,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         etUsername = (EditText) findViewById(R.id.et_username);
         etPassword = (EditText) findViewById(R.id.et_password);
 
-        //
+        //hardcoded credentials for testing
         etUsername.setText("santoshvarma4u@gmail.com");
         etPassword.setText("sant12345");
     }
